@@ -8,12 +8,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <BaseOutputPath></BaseOutputPath>
-    <PackageIcon>icon.png</PackageIcon>
-    <ApplicationIcon>Icons\icon.ico</ApplicationIcon>
+    <PackageIcon>128.png</PackageIcon>
+    <ApplicationIcon>Icons\128.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Icons\icon.ico" />
+    <Content Include="Icons\128.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Icons\128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="Icons\icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
