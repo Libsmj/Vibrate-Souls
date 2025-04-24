@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>Buttplug.Net is a buttplug client library written in modern .Net</Description>
+		<Summary>Buttplug.Net is a buttplug client library written in modern .Net</Summary>
+	  	
+	  	<AssemblyName>Buttplug.Net</AssemblyName>
+		<RootNamespace>Buttplug</RootNamespace>
+		<BaseOutputPath></BaseOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
+		<InternalsVisibleTo Include="$(AssemblyName).NewtonsoftJson.Tests" />
+		<InternalsVisibleTo Include="$(AssemblyName).SystemTextJson.Tests" />
+	</ItemGroup>
+</Project>

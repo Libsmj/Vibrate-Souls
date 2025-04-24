@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Description>System.Text.Json based converter for Buttplug.Net</Description>
+		<Summary>System.Text.Json based converter for Buttplug.Net</Summary>
+		
+		<AssemblyName>Buttplug.Net.SystemTextJson</AssemblyName>
+		<RootNamespace>Buttplug.SystemTextJson</RootNamespace>
+		<BaseOutputPath></BaseOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Buttplug.Net\Buttplug.Net.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
+	</ItemGroup>
+</Project>
