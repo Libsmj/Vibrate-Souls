@@ -1,4 +1,5 @@
 ﻿using Iced.Intel;
+using System.Text;
 using static VibrateGames.MemoryHelper;
 
 namespace VibrateGames
@@ -6,51 +7,47 @@ namespace VibrateGames
     internal class EldenRingDataHelper
     {
         private readonly ProcessInfo eldenRingProcess;
-        private readonly PlayerParams playerParams;
         private IntPtr gameDataMan;
+
+        public readonly PlayerParams PlayerParams;
 
         public EldenRingDataHelper(ProcessInfo eldenRingProcess)
         {
             this.eldenRingProcess = eldenRingProcess;
             SetGameDataManAddress();
 
-            playerParams = new PlayerParams(eldenRingProcess.ProcessHandle, gameDataMan);
+            PlayerParams = new PlayerParams(eldenRingProcess.Handle, gameDataMan);
         }
 
         private void SetGameDataManAddress()
         {
             string GameDataManAOB = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3";
+            //string WorldChrManAOB = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 0F 48 39 88";
+            //string GameManAOB = "48 8B 05 ?? ?? ?? ?? 80 B8 ?? ?? ?? ?? 0D 0F 94 C0 C3";
 
             // Find the address instruction to disassemble
-            IntPtr addressOfInstruction = FindAOB(GameDataManAOB, eldenRingProcess.ProcessHandle, eldenRingProcess.Module);
+            IntPtr addressOfInstruction = FindAOB(GameDataManAOB, eldenRingProcess);
 
             // Get the machine code to disassemble to find address of GameDataMan
-            byte[] buffer = new byte[8];
-            ReadProcessMemory(eldenRingProcess.ProcessHandle, addressOfInstruction, buffer, 7, out _);
+            byte[] buffer = new byte[7];
+            ReadProcessMemory(eldenRingProcess.Handle, addressOfInstruction, buffer, 7, out _);
             Instruction instruction = Disassemble(buffer);
 
             gameDataMan = addressOfInstruction + (nint)instruction.MemoryDisplacement64;
-        }
-
-        public int GetHP()
-        {
-            playerParams?.UpdateStats();
-
-            return playerParams?.Hp ?? 0;
         }
     }
 
     public class PlayerParams
     {
         private readonly IntPtr processHandle;
-        private readonly IntPtr playerParamAddress;
+        private readonly IntPtr playerParamAddress; 
 
         public PlayerParams(IntPtr eldenRingProcessHandle, IntPtr gameDataMan)
         {
             processHandle = eldenRingProcessHandle;
             playerParamAddress = RunPointerOffsets(processHandle, gameDataMan, [0x08]);
         }
-        
+
         public void UpdateStats()
         {
             int size = 0xFD + 0x01;
@@ -90,6 +87,8 @@ namespace VibrateGames
 
             ScadutreeBlessing = buffer[0xFC];
             ReveredSpiritAshBlessing = buffer[0xFD];
+
+            PlayerName = Encoding.Unicode.GetString(buffer, 0x9c, 32).Trim((char)0x0);
         }
 
         public int Hp { get; set; }
@@ -121,5 +120,7 @@ namespace VibrateGames
 
         public int ScadutreeBlessing { get; set; }
         public int ReveredSpiritAshBlessing { get; set; }
+
+        public string PlayerName { get; set; } = "";
     }
 }

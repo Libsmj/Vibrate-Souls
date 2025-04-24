@@ -65,9 +65,9 @@
             NumDevicesLabel.AutoSize = true;
             NumDevicesLabel.Location = new Point(12, 61);
             NumDevicesLabel.Name = "NumDevicesLabel";
-            NumDevicesLabel.Size = new Size(65, 15);
+            NumDevicesLabel.Size = new Size(126, 15);
             NumDevicesLabel.TabIndex = 2;
-            NumDevicesLabel.Text = "Scanning...";
+            NumDevicesLabel.Text = "Connecting to server...";
             // 
             // DetectEldenRingLabel
             // 

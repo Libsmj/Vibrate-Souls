@@ -17,7 +17,7 @@ namespace VibrateGames
 
         public class ProcessInfo(IntPtr processHandle, ProcessModule module)
         {
-            public IntPtr ProcessHandle { get; set; } = processHandle;
+            public IntPtr Handle { get; set; } = processHandle;
             public ProcessModule Module { get; set; } = module;
         }
 
@@ -40,21 +40,20 @@ namespace VibrateGames
         /// Finds an array of bytes within a processes memory.
         /// </summary>
         /// <param name="aobPattern">A string representing the bytes you want to find in hex split by ' '. ?? means any data</param>
-        /// <param name="proccessHandle">The handle of the process</param>
-        /// <param name="processModule">The module of the process</param>
+        /// <param name="process">The process to search through</param>
         /// <returns>Pointer to the location of the AOB in memory</returns>
-        public static IntPtr FindAOB(string aobPattern, IntPtr proccessHandle, ProcessModule processModule)
+        public static IntPtr FindAOB(string aobPattern, ProcessInfo process)
         {
-            if (processModule == null)
+            if (process.Module == null)
             {
                 return 0;
             }
 
-            byte[] processMemory = new byte[processModule.ModuleMemorySize];
+            byte[] processMemory = new byte[process.Module.ModuleMemorySize];
             byte?[] aob = ConvertAOB(aobPattern);
-            ReadProcessMemory(proccessHandle, processModule.BaseAddress, processMemory, processModule.ModuleMemorySize, out _);
+            ReadProcessMemory(process.Handle, process.Module.BaseAddress, processMemory, process.Module.ModuleMemorySize, out _);
 
-            return ScanLogic(processModule, processMemory, aob);
+            return ScanLogic(process.Module, processMemory, aob);
         }
 
         /// <summary>
