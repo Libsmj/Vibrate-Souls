@@ -6,43 +6,79 @@ namespace VibrateGames
     public partial class VibrateGames : Form
     {
         private ButtplugClient? bpClient;
-        private readonly EldenRingDataHelper eldenRingDataHelper;
+        private EldenRingDataHelper? eldenRingDataHelper;
 
         private static readonly int pollingRate = 10;
         private static readonly CancellationToken cancellationToken = CancellationToken.None;
+
+        private string serverAddress = "ws://127.0.0.1:12345/";
 
         public VibrateGames()
         {
             InitializeComponent();
             InitializeClient();
-
-            eldenRingDataHelper = new EldenRingDataHelper();
             DetectEldenRing();
         }
 
+        #region Event Handlers
+
+        private void IntifaceConnectButton_Click(object sender, EventArgs e)
+        {
+            InitializeClient();
+        }
+
+        private void RescanButton_Click(object sender, EventArgs e)
+        {
+            DetectDevices();
+        }
+
+        private void VibrateButton_Clicked(object sender, EventArgs e)
+        {
+            VibrateAll();
+        }
+
+        private void DetectEldenRing_Click(object sender, EventArgs e)
+        {
+            DetectEldenRing();
+        }
+
+        #endregion
+
+        #region Buttplug Stuff
+
         private async void InitializeClient()
         {
+            IntifaceConnectButton.Enabled = false;
+            RescanButton.Enabled = false;
+
+            if (bpClient != null)
+            {
+                await bpClient.DisconnectAsync();
+            }
             try
             {
                 var converter = new ButtplugSystemTextJsonConverter();
-                bpClient = new("Buttplug.Net", converter);
-                await bpClient.ConnectAsync(new Uri("ws://127.0.0.1:12345/"), cancellationToken);
+                bpClient = new("Vibrate Souls", converter);
+                await bpClient.ConnectAsync(new Uri(serverAddress), cancellationToken);
+                DetectDevices();
             }
             catch (Exception)
             {
-                Console.WriteLine("Could not connect");
+                NumDevicesLabel.Text = "Could not connect to server";
+                RescanButton.Enabled = false;
             }
-            DetectDevices();
+            IntifaceConnectButton.Enabled = true;
         }
 
         private async void DetectDevices()
         {
-            NumDevicesLabel.Text = "Scanning...";
-            if (bpClient == null || bpClient.Devices.Count == 0)
+            if (bpClient == null)
             {
-                SetNumDeviceText();
+                RescanButton.Enabled = false;
+                NumDevicesLabel.Text = "Could not connect to server";
                 return;
             }
+            NumDevicesLabel.Text = "Scanning...";
             await bpClient.StartScanningAsync(cancellationToken);
             await Task.Delay(100);
             await bpClient.StopScanningAsync(cancellationToken);
@@ -57,7 +93,24 @@ namespace VibrateGames
             }
             else
             {
-                NumDevicesLabel.Text = bpClient.Devices.Count.ToString() + " Devices found.";
+                int numDevices = bpClient.Devices.Count;
+                if (numDevices == 0)
+                {
+                    VibrateButton.Enabled = false;
+                    NumDevicesLabel.Text = "No devices found";
+                }
+                else 
+                {
+                    VibrateButton.Enabled = true;
+                    if (numDevices == 1)
+                    {
+                        NumDevicesLabel.Text = "1 device found";
+                    }
+                    else
+                    {
+                        NumDevicesLabel.Text = numDevices.ToString() + " devices found";
+                    }
+                }
             }
         }
 
@@ -77,32 +130,28 @@ namespace VibrateGames
             await bpClient.StopAllDevicesAsync(cancellationToken);
         }
 
-        private void VibrateButton_Clicked(object sender, EventArgs e)
-        {
-            VibrateAll();
-        }
+        #endregion
 
-        private void RescanButton_Click(object sender, EventArgs e)
-        {
-            DetectDevices();
-        }
-
+        #region Elden Ring
 
         private void DetectEldenRing()
         {
-            if (eldenRingDataHelper.FindEldenRingProcess())
+            MemoryHelper.ProcessInfo? eldenRing = MemoryHelper.FindProcess("eldenring", "eldenring.exe");
+            if (eldenRing == null)
             {
-                DetectEldenRingLabel.Text = "Elden Ring detected";
-                CheckHp();
-            }
-            else
-            {
+                DetectEldenRingButton.Enabled = true;
                 DetectEldenRingLabel.Text = "Elden Ring not found";
+                return;
             }
+            eldenRingDataHelper = new EldenRingDataHelper(eldenRing);
+            DetectEldenRingButton.Enabled = true;
+            DetectEldenRingLabel.Text = "Elden Ring detected";
+            CheckHp();
         }
 
         private async void CheckHp()
         {
+            int previousHp = eldenRingDataHelper?.GetHP() ?? -1;
             while (true)
             {
                 if (eldenRingDataHelper == null)
@@ -110,14 +159,17 @@ namespace VibrateGames
                     return;
                 }
                 int hp = eldenRingDataHelper.GetHP();
+                if (hp < previousHp)
+                {
+                    VibrateAll();
+                }
+                previousHp = hp;
                 HealthPointsLabel.Text = "HP: " + hp;
                 await Task.Delay(pollingRate);
             }
         }
 
-        private void DetectEldenRing_Click(object sender, EventArgs e)
-        {
-            DetectEldenRing();
-        }
+        #endregion
+
     }
 }

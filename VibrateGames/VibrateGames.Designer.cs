@@ -34,11 +34,13 @@
             DetectEldenRingLabel = new Label();
             DetectEldenRingButton = new Button();
             HealthPointsLabel = new Label();
+            IntifaceConnectButton = new Button();
             SuspendLayout();
             // 
             // VibrateButton
             // 
-            VibrateButton.Location = new Point(12, 51);
+            VibrateButton.Enabled = false;
+            VibrateButton.Location = new Point(12, 93);
             VibrateButton.Name = "VibrateButton";
             VibrateButton.Size = new Size(75, 23);
             VibrateButton.TabIndex = 0;
@@ -48,7 +50,8 @@
             // 
             // RescanButton
             // 
-            RescanButton.Location = new Point(93, 51);
+            RescanButton.Enabled = false;
+            RescanButton.Location = new Point(93, 24);
             RescanButton.Name = "RescanButton";
             RescanButton.Size = new Size(75, 23);
             RescanButton.TabIndex = 1;
@@ -59,7 +62,7 @@
             // NumDevicesLabel
             // 
             NumDevicesLabel.AutoSize = true;
-            NumDevicesLabel.Location = new Point(12, 33);
+            NumDevicesLabel.Location = new Point(12, 61);
             NumDevicesLabel.Name = "NumDevicesLabel";
             NumDevicesLabel.Size = new Size(65, 15);
             NumDevicesLabel.TabIndex = 2;
@@ -68,7 +71,7 @@
             // DetectEldenRingLabel
             // 
             DetectEldenRingLabel.AutoSize = true;
-            DetectEldenRingLabel.Location = new Point(12, 104);
+            DetectEldenRingLabel.Location = new Point(12, 146);
             DetectEldenRingLabel.Name = "DetectEldenRingLabel";
             DetectEldenRingLabel.Size = new Size(126, 15);
             DetectEldenRingLabel.TabIndex = 4;
@@ -76,7 +79,8 @@
             // 
             // DetectEldenRingButton
             // 
-            DetectEldenRingButton.Location = new Point(12, 122);
+            DetectEldenRingButton.Enabled = false;
+            DetectEldenRingButton.Location = new Point(12, 164);
             DetectEldenRingButton.Name = "DetectEldenRingButton";
             DetectEldenRingButton.Size = new Size(128, 23);
             DetectEldenRingButton.TabIndex = 5;
@@ -87,25 +91,37 @@
             // HealthPointsLabel
             // 
             HealthPointsLabel.AutoSize = true;
-            HealthPointsLabel.Location = new Point(12, 175);
+            HealthPointsLabel.Location = new Point(12, 201);
             HealthPointsLabel.Name = "HealthPointsLabel";
             HealthPointsLabel.Size = new Size(26, 15);
             HealthPointsLabel.TabIndex = 6;
             HealthPointsLabel.Text = "Hp:";
             // 
-            // Form1
+            // IntifaceConnectButton
+            // 
+            IntifaceConnectButton.Enabled = false;
+            IntifaceConnectButton.Location = new Point(12, 24);
+            IntifaceConnectButton.Name = "IntifaceConnectButton";
+            IntifaceConnectButton.Size = new Size(75, 23);
+            IntifaceConnectButton.TabIndex = 7;
+            IntifaceConnectButton.Text = "Reconnect";
+            IntifaceConnectButton.UseVisualStyleBackColor = true;
+            IntifaceConnectButton.Click += IntifaceConnectButton_Click;
+            // 
+            // VibrateGames
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(327, 402);
+            ClientSize = new Size(306, 301);
+            Controls.Add(IntifaceConnectButton);
             Controls.Add(HealthPointsLabel);
             Controls.Add(DetectEldenRingButton);
             Controls.Add(DetectEldenRingLabel);
             Controls.Add(NumDevicesLabel);
             Controls.Add(RescanButton);
             Controls.Add(VibrateButton);
-            Name = "Form1";
-            Text = "Form1";
+            Name = "VibrateGames";
+            Text = "Vibrate Souls";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -118,5 +134,6 @@
         private Label DetectEldenRingLabel;
         private Button DetectEldenRingButton;
         private Label HealthPointsLabel;
+        private Button IntifaceConnectButton;
     }
 }

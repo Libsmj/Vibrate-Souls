@@ -1,5 +1,6 @@
 ﻿using Iced.Intel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace VibrateGames
@@ -7,12 +8,33 @@ namespace VibrateGames
     public static class MemoryHelper
     {
         [DllImport("kernel32.dll")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
+        [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
         internal static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
         [DllImport("kernel32.dll")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
+        [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
         internal static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
+
+        public class ProcessInfo(IntPtr processHandle, ProcessModule module)
+        {
+            public IntPtr ProcessHandle { get; set; } = processHandle;
+            public ProcessModule Module { get; set; } = module;
+        }
+
+        public static ProcessInfo? FindProcess(string name, string moduleName)
+        {
+            Process[] processes = Process.GetProcessesByName(name);
+            foreach (Process process in processes)
+            {
+                if (process.MainModule?.ModuleName == moduleName)
+                {
+                    int PROCESS_VM_READ = 0x0010;
+                    var handle = OpenProcess(PROCESS_VM_READ, false, process.Id);
+                    return new ProcessInfo(handle, process.MainModule);
+                }
+            }
+            return null;
+        }
 
         /// <summary>
         /// Finds an array of bytes within a processes memory.

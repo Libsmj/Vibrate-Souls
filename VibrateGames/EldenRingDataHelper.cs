@@ -1,57 +1,35 @@
 ﻿using Iced.Intel;
-using System.Diagnostics;
+using static VibrateGames.MemoryHelper;
 
 namespace VibrateGames
 {
     internal class EldenRingDataHelper
     {
-        private IntPtr EldenRingProcessHandle;
-        private ProcessModule? MainModule;
-        private IntPtr playerParamAddress;
+        private readonly ProcessInfo eldenRingProcess;
+        private readonly PlayerParams playerParams;
+        private IntPtr gameDataMan;
 
-        private readonly PlayerParams? playerParams;
-
-        public EldenRingDataHelper()
+        public EldenRingDataHelper(ProcessInfo eldenRingProcess)
         {
-            if (FindEldenRingProcess())
-            {
-                SetPlayerParamAddress();
-                playerParams = new PlayerParams(EldenRingProcessHandle, playerParamAddress);
-            }
+            this.eldenRingProcess = eldenRingProcess;
+            SetGameDataManAddress();
+
+            playerParams = new PlayerParams(eldenRingProcess.ProcessHandle, gameDataMan);
         }
 
-        public bool FindEldenRingProcess()
+        private void SetGameDataManAddress()
         {
-            Process[] processes = Process.GetProcessesByName("eldenring");
-            foreach (Process process in processes)
-            {
-                if (process.MainModule?.ModuleName == "eldenring.exe")
-                {
-                    int PROCESS_VM_READ = 0x0010;
-                    EldenRingProcessHandle = MemoryHelper.OpenProcess(PROCESS_VM_READ, false, process.Id);
-                    MainModule = process.MainModule;
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void SetPlayerParamAddress()
-        {
-            if (MainModule == null) { return; }
             string GameDataManAOB = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3";
 
             // Find the address instruction to disassemble
-            IntPtr addressOfInstruction = MemoryHelper.FindAOB(GameDataManAOB, EldenRingProcessHandle, MainModule);
+            IntPtr addressOfInstruction = FindAOB(GameDataManAOB, eldenRingProcess.ProcessHandle, eldenRingProcess.Module);
 
             // Get the machine code to disassemble to find address of GameDataMan
             byte[] buffer = new byte[8];
-            MemoryHelper.ReadProcessMemory(EldenRingProcessHandle, addressOfInstruction, buffer, 7, out _);
-            Instruction instruction = MemoryHelper.Disassemble(buffer);
+            ReadProcessMemory(eldenRingProcess.ProcessHandle, addressOfInstruction, buffer, 7, out _);
+            Instruction instruction = Disassemble(buffer);
 
-            IntPtr gameDataMan = addressOfInstruction + (nint)instruction.MemoryDisplacement64;
-
-            playerParamAddress = MemoryHelper.RunPointerOffsets(EldenRingProcessHandle, gameDataMan, [0x08]);
+            gameDataMan = addressOfInstruction + (nint)instruction.MemoryDisplacement64;
         }
 
         public int GetHP()
@@ -62,14 +40,23 @@ namespace VibrateGames
         }
     }
 
-    public class PlayerParams(IntPtr EldenRingProcessHandle, IntPtr PlayerParamAddress)
+    public class PlayerParams
     {
+        private readonly IntPtr processHandle;
+        private readonly IntPtr playerParamAddress;
+
+        public PlayerParams(IntPtr eldenRingProcessHandle, IntPtr gameDataMan)
+        {
+            processHandle = eldenRingProcessHandle;
+            playerParamAddress = RunPointerOffsets(processHandle, gameDataMan, [0x08]);
+        }
+        
         public void UpdateStats()
         {
             int size = 0xFD + 0x01;
             byte[] buffer = new byte[size];
 
-            MemoryHelper.ReadProcessMemory(EldenRingProcessHandle, PlayerParamAddress, buffer, size + 0x04, out _);
+            ReadProcessMemory(processHandle, playerParamAddress, buffer, size + 0x04, out _);
             Hp = BitConverter.ToInt32(buffer, 0x10);
             MaxHp = BitConverter.ToInt32(buffer, 0x14);
             BaseMaxHp = BitConverter.ToInt32(buffer, 0x18);
