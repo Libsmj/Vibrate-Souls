@@ -8,7 +8,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <BaseOutputPath></BaseOutputPath>
+    <PackageIcon>icon.png</PackageIcon>
+    <ApplicationIcon>Icons\icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Icons\icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Buttplug.Net">
@@ -23,6 +29,13 @@
     <Reference Include="Iced">
       <HintPath>..\Iced\Intel\Iced\bin\Debug\net45\Iced.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Icons\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

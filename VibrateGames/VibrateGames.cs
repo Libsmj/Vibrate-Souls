@@ -60,12 +60,12 @@ namespace VibrateGames
                 var converter = new ButtplugSystemTextJsonConverter();
                 bpClient = new("Vibrate Souls", converter);
                 await bpClient.ConnectAsync(new Uri(serverAddress), cancellationToken);
+                RescanButton.Enabled = true;
                 DetectDevices();
             }
             catch (Exception)
             {
                 NumDevicesLabel.Text = "Could not connect to server";
-                RescanButton.Enabled = false;
             }
             IntifaceConnectButton.Enabled = true;
         }
@@ -79,10 +79,18 @@ namespace VibrateGames
                 return;
             }
             NumDevicesLabel.Text = "Scanning...";
-            await bpClient.StartScanningAsync(cancellationToken);
-            await Task.Delay(100);
-            await bpClient.StopScanningAsync(cancellationToken);
-            SetNumDeviceText();
+            try
+            {
+                await bpClient.StartScanningAsync(cancellationToken);
+                await Task.Delay(100);
+                await bpClient.StopScanningAsync(cancellationToken);
+                SetNumDeviceText();
+            }
+            catch
+            {
+                NumDevicesLabel.Text = "Disconnected, reconnecting...";
+                InitializeClient();
+            }
         }
 
         private void SetNumDeviceText()
@@ -139,6 +147,7 @@ namespace VibrateGames
             MemoryHelper.ProcessInfo? eldenRing = MemoryHelper.FindProcess("eldenring", "eldenring.exe");
             if (eldenRing == null)
             {
+                eldenRingDataHelper = null;
                 DetectEldenRingButton.Enabled = true;
                 DetectEldenRingLabel.Text = "Elden Ring not found";
                 return;

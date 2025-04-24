@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VibrateGames));
             VibrateButton = new Button();
             RescanButton = new Button();
             NumDevicesLabel = new Label();
@@ -120,6 +121,7 @@
             Controls.Add(NumDevicesLabel);
             Controls.Add(RescanButton);
             Controls.Add(VibrateButton);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "VibrateGames";
             Text = "Vibrate Souls";
             ResumeLayout(false);
