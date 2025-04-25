@@ -51,7 +51,8 @@ namespace VibrateGames
             IntifaceConnectButton.Enabled = false;
             RescanButton.Enabled = false;
             VibrateButton.Enabled = false;
-            NumDevicesLabel.Text = "Connecting to server...";
+            VibrationsEnabledButton.Enabled = false;
+            DeviceStatusLabel.Text = "Connecting to server...";
 
             if (bpClient != null)
             {
@@ -68,7 +69,7 @@ namespace VibrateGames
             }
             catch (Exception)
             {
-                NumDevicesLabel.Text = "Could not connect to server";
+                DeviceStatusLabel.Text = "Could not connect to server";
             }
             IntifaceConnectButton.Enabled = true;
         }
@@ -77,12 +78,14 @@ namespace VibrateGames
         {
             RescanButton.Enabled = false;
             VibrateButton.Enabled = false;
+            VibrationsEnabledButton.Enabled = false;
+
             if (bpClient == null)
             {
-                NumDevicesLabel.Text = "Could not connect to server";
+                DeviceStatusLabel.Text = "Could not connect to server";
                 return;
             }
-            NumDevicesLabel.Text = "Scanning...";
+            DeviceStatusLabel.Text = "Scanning...";
             try
             {
                 await bpClient.StartScanningAsync(cancellationToken);
@@ -93,7 +96,7 @@ namespace VibrateGames
             }
             catch
             {
-                NumDevicesLabel.Text = "Disconnected, reconnecting...";
+                DeviceStatusLabel.Text = "Disconnected, reconnecting...";
                 InitializeClient();
             }
         }
@@ -105,20 +108,16 @@ namespace VibrateGames
                 return;
             }
             int numDevices = bpClient.Devices.Count;
-            switch (numDevices)
+            if (numDevices == 0)
             {
-                case 0:
-                    VibrateButton.Enabled = false;
-                    NumDevicesLabel.Text = "No devices found";
-                    break;
-                case 1:
-                    VibrateButton.Enabled = true;
-                    NumDevicesLabel.Text = "1 device found";
-                    break;
-                default:
-                    VibrateButton.Enabled = true;
-                    NumDevicesLabel.Text = numDevices.ToString() + " devices found";
-                    break;
+                VibrateButton.Enabled = false;
+                DeviceStatusLabel.Text = "No devices found";
+            }
+            else
+            {
+                VibrateButton.Enabled = true;
+                VibrationsEnabledButton.Enabled = true;
+                DeviceStatusLabel.Text = numDevices > 1 ? numDevices.ToString() + " devices found" : "1 device found";
             }
         }
 
@@ -164,21 +163,20 @@ namespace VibrateGames
 
         private async void ScanPlayerParams()
         {
-            PlayerParams? playerParams = eldenRingDataHelper?.PlayerParams;
-            playerParams?.UpdateStats();
-            int previousHp = playerParams?.Hp ?? -1;
-            string previousName = playerParams?.PlayerName ?? "";
+            if (eldenRingDataHelper == null)
+            {
+                return;
+            }
+            eldenRingDataHelper.PlayerParams.UpdateStats();
+            int previousHp = eldenRingDataHelper.PlayerParams.Hp;
+            string previousName = eldenRingDataHelper.PlayerParams.PlayerName;
 
             while (true)
             {
-                if (playerParams == null)
-                {
-                    return;
-                }
-                playerParams.UpdateStats();
+                eldenRingDataHelper.PlayerParams.UpdateStats();
 
-                int hp = playerParams.Hp;
-                string name = playerParams.PlayerName;
+                int hp = eldenRingDataHelper.PlayerParams.Hp;
+                string name = eldenRingDataHelper.PlayerParams.PlayerName;
                 if (hp < previousHp && name == previousName)
                 {
                     VibrateAll();
@@ -192,6 +190,5 @@ namespace VibrateGames
         }
 
         #endregion
-
     }
 }

@@ -6,34 +6,35 @@ namespace VibrateGames
 {
     internal class EldenRingDataHelper
     {
-        private readonly ProcessInfo eldenRingProcess;
-        private IntPtr gameDataMan;
-
         public readonly PlayerParams PlayerParams;
+
+        private readonly ProcessInfo EldenRingProcess;
+        private IntPtr GameDataMan;
 
         public EldenRingDataHelper(ProcessInfo eldenRingProcess)
         {
-            this.eldenRingProcess = eldenRingProcess;
+            EldenRingProcess = eldenRingProcess;
             SetGameDataManAddress();
 
-            PlayerParams = new PlayerParams(eldenRingProcess.Handle, gameDataMan);
+            PlayerParams = new PlayerParams(eldenRingProcess.Handle, GameDataMan);
         }
 
         private void SetGameDataManAddress()
         {
-            string GameDataManAOB = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3";
-            //string WorldChrManAOB = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 0F 48 39 88";
-            //string GameManAOB = "48 8B 05 ?? ?? ?? ?? 80 B8 ?? ?? ?? ?? 0D 0F 94 C0 C3";
+            AOBParam gameDataManAOB = new("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3");
+            AOBParam worldChrManAOB = new("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 0F 48 39 88");
+            AOBParam gameManAOB = new("48 8B 05 ?? ?? ?? ?? 80 B8 ?? ?? ?? ?? 0D 0F 94 C0 C3");
+            List<AOBParam> aobs = [gameDataManAOB, worldChrManAOB, gameManAOB];
 
             // Find the address instruction to disassemble
-            IntPtr addressOfInstruction = FindAOB(GameDataManAOB, eldenRingProcess);
+            FindAOB(EldenRingProcess, aobs);
 
             // Get the machine code to disassemble to find address of GameDataMan
             byte[] buffer = new byte[7];
-            ReadProcessMemory(eldenRingProcess.Handle, addressOfInstruction, buffer, 7, out _);
+            ReadProcessMemory(EldenRingProcess.Handle, gameDataManAOB.Address, buffer, 7, out _);
             Instruction instruction = Disassemble(buffer);
 
-            gameDataMan = addressOfInstruction + (nint)instruction.MemoryDisplacement64;
+            GameDataMan = gameDataManAOB.Address + (nint)instruction.MemoryDisplacement64;
         }
     }
 

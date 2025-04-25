@@ -31,19 +31,22 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VibrateGames));
             VibrateButton = new Button();
             RescanButton = new Button();
-            NumDevicesLabel = new Label();
+            DeviceStatusLabel = new Label();
             DetectEldenRingLabel = new Label();
             DetectEldenRingButton = new Button();
             HealthPointsLabel = new Label();
             IntifaceConnectButton = new Button();
+            VibrationsEnabledButton = new CheckBox();
             SuspendLayout();
             // 
             // VibrateButton
             // 
             VibrateButton.Enabled = false;
-            VibrateButton.Location = new Point(12, 93);
+            VibrateButton.Font = new Font("Microsoft Sans Serif", 12F);
+            VibrateButton.Location = new Point(12, 99);
+            VibrateButton.Margin = new Padding(3, 9, 3, 3);
             VibrateButton.Name = "VibrateButton";
-            VibrateButton.Size = new Size(75, 23);
+            VibrateButton.Size = new Size(112, 34);
             VibrateButton.TabIndex = 0;
             VibrateButton.Text = "Vibrate All";
             VibrateButton.UseVisualStyleBackColor = true;
@@ -52,9 +55,11 @@
             // RescanButton
             // 
             RescanButton.Enabled = false;
-            RescanButton.Location = new Point(93, 24);
+            RescanButton.Font = new Font("Microsoft Sans Serif", 12F);
+            RescanButton.Location = new Point(130, 24);
+            RescanButton.Margin = new Padding(3, 9, 3, 3);
             RescanButton.Name = "RescanButton";
-            RescanButton.Size = new Size(75, 23);
+            RescanButton.Size = new Size(112, 34);
             RescanButton.TabIndex = 1;
             RescanButton.Text = "Rescan";
             RescanButton.UseVisualStyleBackColor = true;
@@ -62,28 +67,33 @@
             // 
             // NumDevicesLabel
             // 
-            NumDevicesLabel.AutoSize = true;
-            NumDevicesLabel.Location = new Point(12, 61);
-            NumDevicesLabel.Name = "NumDevicesLabel";
-            NumDevicesLabel.Size = new Size(126, 15);
-            NumDevicesLabel.TabIndex = 2;
-            NumDevicesLabel.Text = "Connecting to server...";
+            DeviceStatusLabel.AutoSize = true;
+            DeviceStatusLabel.Font = new Font("Microsoft Sans Serif", 12F);
+            DeviceStatusLabel.Location = new Point(12, 70);
+            DeviceStatusLabel.Margin = new Padding(3, 9, 3, 0);
+            DeviceStatusLabel.Name = "NumDevicesLabel";
+            DeviceStatusLabel.Size = new Size(167, 20);
+            DeviceStatusLabel.TabIndex = 2;
+            DeviceStatusLabel.Text = "Connecting to server...";
             // 
             // DetectEldenRingLabel
             // 
             DetectEldenRingLabel.AutoSize = true;
-            DetectEldenRingLabel.Location = new Point(12, 146);
+            DetectEldenRingLabel.Font = new Font("Microsoft Sans Serif", 12F);
+            DetectEldenRingLabel.Location = new Point(12, 177);
             DetectEldenRingLabel.Name = "DetectEldenRingLabel";
-            DetectEldenRingLabel.Size = new Size(126, 15);
+            DetectEldenRingLabel.Size = new Size(172, 20);
             DetectEldenRingLabel.TabIndex = 4;
             DetectEldenRingLabel.Text = "Detecting Elden Ring...";
             // 
             // DetectEldenRingButton
             // 
             DetectEldenRingButton.Enabled = false;
-            DetectEldenRingButton.Location = new Point(12, 164);
+            DetectEldenRingButton.Font = new Font("Microsoft Sans Serif", 12F);
+            DetectEldenRingButton.Location = new Point(12, 206);
+            DetectEldenRingButton.Margin = new Padding(3, 9, 3, 3);
             DetectEldenRingButton.Name = "DetectEldenRingButton";
-            DetectEldenRingButton.Size = new Size(128, 23);
+            DetectEldenRingButton.Size = new Size(172, 34);
             DetectEldenRingButton.TabIndex = 5;
             DetectEldenRingButton.Text = "Detect Elden Ring";
             DetectEldenRingButton.UseVisualStyleBackColor = true;
@@ -92,33 +102,52 @@
             // HealthPointsLabel
             // 
             HealthPointsLabel.AutoSize = true;
-            HealthPointsLabel.Location = new Point(12, 201);
+            HealthPointsLabel.Font = new Font("Microsoft Sans Serif", 12F);
+            HealthPointsLabel.Location = new Point(12, 243);
             HealthPointsLabel.Name = "HealthPointsLabel";
-            HealthPointsLabel.Size = new Size(26, 15);
+            HealthPointsLabel.Size = new Size(34, 20);
             HealthPointsLabel.TabIndex = 6;
             HealthPointsLabel.Text = "Hp:";
             // 
             // IntifaceConnectButton
             // 
             IntifaceConnectButton.Enabled = false;
+            IntifaceConnectButton.Font = new Font("Microsoft Sans Serif", 12F);
             IntifaceConnectButton.Location = new Point(12, 24);
+            IntifaceConnectButton.Margin = new Padding(3, 9, 3, 3);
             IntifaceConnectButton.Name = "IntifaceConnectButton";
-            IntifaceConnectButton.Size = new Size(75, 23);
+            IntifaceConnectButton.Size = new Size(112, 34);
             IntifaceConnectButton.TabIndex = 7;
             IntifaceConnectButton.Text = "Reconnect";
             IntifaceConnectButton.UseVisualStyleBackColor = true;
             IntifaceConnectButton.Click += IntifaceConnectButton_Click;
             // 
+            // VibrationsEnabledButton
+            // 
+            VibrationsEnabledButton.Appearance = Appearance.Button;
+            VibrationsEnabledButton.BackColor = Color.Yellow;
+            VibrationsEnabledButton.Enabled = false;
+            VibrationsEnabledButton.Font = new Font("Microsoft Sans Serif", 12F);
+            VibrationsEnabledButton.ForeColor = SystemColors.ControlText;
+            VibrationsEnabledButton.Location = new Point(142, 99);
+            VibrationsEnabledButton.Name = "VibrationsEnabledButton";
+            VibrationsEnabledButton.Size = new Size(113, 52);
+            VibrationsEnabledButton.TabIndex = 8;
+            VibrationsEnabledButton.Text = "Vibrations Disabled";
+            VibrationsEnabledButton.TextAlign = ContentAlignment.MiddleCenter;
+            VibrationsEnabledButton.UseVisualStyleBackColor = false;
+            // 
             // VibrateGames
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(306, 301);
+            ClientSize = new Size(382, 364);
+            Controls.Add(VibrationsEnabledButton);
             Controls.Add(IntifaceConnectButton);
             Controls.Add(HealthPointsLabel);
             Controls.Add(DetectEldenRingButton);
             Controls.Add(DetectEldenRingLabel);
-            Controls.Add(NumDevicesLabel);
+            Controls.Add(DeviceStatusLabel);
             Controls.Add(RescanButton);
             Controls.Add(VibrateButton);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -132,10 +161,11 @@
 
         private Button VibrateButton;
         private Button RescanButton;
-        private Label NumDevicesLabel;
+        private Label DeviceStatusLabel;
         private Label DetectEldenRingLabel;
         private Button DetectEldenRingButton;
         private Label HealthPointsLabel;
         private Button IntifaceConnectButton;
+        private CheckBox VibrationsEnabledButton;
     }
 }

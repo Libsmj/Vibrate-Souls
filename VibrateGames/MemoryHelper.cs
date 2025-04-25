@@ -7,6 +7,7 @@ namespace VibrateGames
 {
     public static class MemoryHelper
     {
+        #region Process Info
         [DllImport("kernel32.dll")]
         [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
         internal static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
@@ -15,10 +16,16 @@ namespace VibrateGames
         [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
         internal static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
 
-        public class ProcessInfo(IntPtr processHandle, ProcessModule module)
+        public class ProcessInfo
         {
-            public IntPtr Handle { get; set; } = processHandle;
-            public ProcessModule Module { get; set; } = module;
+            public ProcessInfo(IntPtr processHandle, ProcessModule module)
+            {
+                Handle = processHandle;
+                Module = module;
+            }
+
+            public IntPtr Handle;
+            public ProcessModule Module;
         }
 
         public static ProcessInfo? FindProcess(string name, string moduleName)
@@ -35,25 +42,113 @@ namespace VibrateGames
             }
             return null;
         }
+        #endregion
+
+        #region AOB Scan
+        public class AOBParam
+        {
+            public AOBParam(byte?[] aob)
+            {
+                AOB = aob;
+            }
+
+            public AOBParam(string aob) 
+                : this(ConvertAOB(aob)) 
+            { }
+
+            public readonly byte?[] AOB;
+            public readonly int[]? Offsets;
+
+            public IntPtr Address;
+
+            /// <summary>
+            /// Converts a string representation of bytes to search for into an array
+            /// </summary>
+            /// <param name="aob"></param>
+            /// <returns></returns>
+            private static byte?[] ConvertAOB(string aob)
+            {
+                return [.. aob.Split(' ').Select<string, byte?>(
+                    token => token == "??" 
+                    ? null 
+                    : Convert.ToByte(token, 16)
+                    )];
+            }
+        }
 
         /// <summary>
         /// Finds an array of bytes within a processes memory.
         /// </summary>
-        /// <param name="aobPattern">A string representing the bytes you want to find in hex split by ' '. ?? means any data</param>
         /// <param name="process">The process to search through</param>
+        /// <param name="aobParams"></param>
         /// <returns>Pointer to the location of the AOB in memory</returns>
-        public static IntPtr FindAOB(string aobPattern, ProcessInfo process)
+        public static void FindAOB(ProcessInfo process, List<AOBParam> aobParams)
         {
-            if (process.Module == null)
+            int size = 65536; // Number of bytes to read at once
+            int bytesToCopy = size + LongestAOB(aobParams);
+            byte[] processMemory = new byte[bytesToCopy];
+
+            for (int index = 0; index < process.Module.ModuleMemorySize; index++)
             {
-                return 0;
+                if (index % size == 0)
+                {
+                    // Get next chunk of memory
+                    ReadProcessMemory(process.Handle, process.Module.BaseAddress + index, processMemory, bytesToCopy, out _);
+                }
+
+                for (int aobIndex = 0; aobIndex < aobParams.Count; aobIndex++)
+                {
+                    AOBParam aobParam = aobParams[aobIndex];
+                    if (AreBytesEqual(processMemory, index % size, aobParam.AOB))
+                    {
+                        aobParam.Address = process.Module.BaseAddress + index;
+                        aobParams.RemoveAt(aobIndex--); // Remove AOB, we don't need to scan for it again
+                        if (aobParams.Count == 0)
+                        {
+                            // All AOBs found
+                            return;
+                        }
+                    }
+                }
             }
+        }
 
-            byte[] processMemory = new byte[process.Module.ModuleMemorySize];
-            byte?[] aob = ConvertAOB(aobPattern);
-            ReadProcessMemory(process.Handle, process.Module.BaseAddress, processMemory, process.Module.ModuleMemorySize, out _);
+        private static bool AreBytesEqual(byte[] processMemory, int index, byte?[] aob)
+        {
+            for (int i = 0; i < aob.Length && i + index < processMemory.Length; i++)
+            {
+                if (aob[i] != null && aob[i] != processMemory[i + index])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
-            return ScanLogic(process.Module, processMemory, aob);
+        private static int LongestAOB(List<AOBParam> aobParams)
+        {
+            int maxLength = 0;
+            foreach (var aobParam in aobParams)
+            {
+                int length = aobParam.AOB.Length;
+                if (length > maxLength)
+                {
+                    maxLength = length;
+                }
+            }
+            return maxLength;
+        }
+
+        /// <summary>
+        /// Disassembles machine code into a human readable instruction.
+        /// </summary>
+        /// <param name="byteCode"></param>
+        /// <returns></returns>
+        public static Instruction Disassemble(byte[] byteCode)
+        {
+            ByteArrayCodeReader codeReader = new(byteCode);
+            Decoder decoder = Decoder.Create(64, codeReader);
+            return decoder.Decode();
         }
 
         /// <summary>
@@ -79,65 +174,6 @@ namespace VibrateGames
             }
             return pointer;
         }
-
-        /// <summary>
-        /// Disassembles machine code into a human readable instruction.
-        /// </summary>
-        /// <param name="byteCode"></param>
-        /// <returns></returns>
-        public static Instruction Disassemble(byte[] byteCode)
-        {
-            ByteArrayCodeReader codeReader = new(byteCode);
-            Decoder decoder = Decoder.Create(64, codeReader);
-            return decoder.Decode();
-        }
-
-        private static byte?[] ConvertAOB(string aob)
-        {
-            List<byte?> convertertedAOB = [];
-            foreach (string token in aob.Split(' '))
-            {
-                if (token == "??") 
-                { 
-                    convertertedAOB.Add(null); 
-                }
-                else 
-                { 
-                    convertertedAOB.Add(Convert.ToByte(token, 16)); 
-                }
-            }
-            return [.. convertertedAOB];
-        }
-
-        /// <summary>
-        /// Scans for a set of bytes within a process
-        /// </summary>
-        /// <param name="processModule"></param>
-        /// <param name="processMemory"></param>
-        /// <param name="aob"></param>
-        /// <returns></returns>
-        private static IntPtr ScanLogic(ProcessModule processModule, byte[] processMemory, byte?[] aob)
-        {
-            for (int index = 0; index < processMemory.Length; index++)
-            {
-                if (AreBytesEqual(processMemory, index, aob))
-                {
-                    return processModule.BaseAddress + index;
-                }
-            }
-            return IntPtr.Zero;
-        }
-
-        private static bool AreBytesEqual(byte[] processMemory, int index, byte?[] aob)
-        {
-            for (int i = 0; i < aob.Length && i + index < processMemory.Length; i++)
-            {
-                if (aob[i] != null && aob[i] != processMemory[i + index])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+        #endregion
     }
 }
