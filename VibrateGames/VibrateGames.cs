@@ -1,5 +1,4 @@
-using Buttplug;
-using Buttplug.SystemTextJson;
+using Buttplug.Client;
 
 namespace VibrateGames
 {
@@ -62,9 +61,9 @@ namespace VibrateGames
 
             try
             {
-                var converter = new ButtplugSystemTextJsonConverter();
-                bpClient = new("Vibrate Souls", converter);
-                await bpClient.ConnectAsync(new Uri(serverAddress), cancellationToken);
+                bpClient = new("Vibrate Souls");
+                ButtplugWebsocketConnector connector = new(new Uri(serverAddress));
+                await bpClient.ConnectAsync(connector);
                 DetectDevices();
             }
             catch (Exception)
@@ -107,7 +106,7 @@ namespace VibrateGames
             {
                 return;
             }
-            int numDevices = bpClient.Devices.Count;
+            int numDevices = bpClient.Devices.Length;
             if (numDevices == 0)
             {
                 VibrateButton.Enabled = false;
@@ -123,17 +122,14 @@ namespace VibrateGames
 
         public async void VibrateAll()
         {
-            if (bpClient == null || bpClient.Devices.Count == 0)
+            if (bpClient == null || bpClient.Devices.Length == 0)
             {
                 return;
             }
             try
             {
-                foreach (var device in bpClient.Devices)
-                    await device.ScalarAsync(1, ActuatorType.Vibrate, cancellationToken);
-
-                foreach (var actuator in bpClient.Devices.SelectMany(d => d.GetActuators<ButtplugDeviceScalarActuator>(ActuatorType.Vibrate)))
-                    await actuator.ScalarAsync(0.5, cancellationToken);
+                foreach (ButtplugClientDevice? device in bpClient.Devices)
+                    await device.VibrateAsync(1);
 
                 await Task.Delay(1000);
                 await bpClient.StopAllDevicesAsync(cancellationToken);

@@ -36,7 +36,7 @@ namespace VibrateGames
                 if (process.MainModule?.ModuleName == moduleName)
                 {
                     int PROCESS_VM_READ = 0x0010;
-                    var handle = OpenProcess(PROCESS_VM_READ, false, process.Id);
+                    IntPtr handle = OpenProcess(PROCESS_VM_READ, false, process.Id);
                     return new ProcessInfo(handle, process.MainModule);
                 }
             }
@@ -128,7 +128,7 @@ namespace VibrateGames
         private static int LongestAOB(List<AOBParam> aobParams)
         {
             int maxLength = 0;
-            foreach (var aobParam in aobParams)
+            foreach (AOBParam aobParam in aobParams)
             {
                 int length = aobParam.AOB.Length;
                 if (length > maxLength)
