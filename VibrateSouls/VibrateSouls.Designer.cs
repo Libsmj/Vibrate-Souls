@@ -1,6 +1,6 @@
-﻿namespace VibrateGames
+﻿namespace VibrateSouls
 {
-    partial class VibrateGames
+    partial class VibrateSouls
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VibrateGames));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VibrateSouls));
             VibrateButton = new Button();
             RescanButton = new Button();
             DeviceStatusLabel = new Label();
@@ -137,7 +137,7 @@
             VibrationsEnabledButton.TextAlign = ContentAlignment.MiddleCenter;
             VibrationsEnabledButton.UseVisualStyleBackColor = false;
             // 
-            // VibrateGames
+            // VibrateSouls
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -151,7 +151,7 @@
             Controls.Add(RescanButton);
             Controls.Add(VibrateButton);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Name = "VibrateGames";
+            Name = "VibrateSouls";
             Text = "Vibrate Souls";
             ResumeLayout(false);
             PerformLayout();

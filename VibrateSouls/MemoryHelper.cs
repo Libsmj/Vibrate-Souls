@@ -3,28 +3,28 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
-namespace VibrateGames
+namespace VibrateSouls
 {
     public static class MemoryHelper
     {
         #region Process Info
         [DllImport("kernel32.dll")]
         [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
-        internal static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+        internal static extern nint OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
         [DllImport("kernel32.dll")]
         [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
-        internal static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
+        internal static extern bool ReadProcessMemory(nint hProcess, nint lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
 
         public class ProcessInfo
         {
-            public ProcessInfo(IntPtr processHandle, ProcessModule module)
+            public ProcessInfo(nint processHandle, ProcessModule module)
             {
                 Handle = processHandle;
                 Module = module;
             }
 
-            public IntPtr Handle;
+            public nint Handle;
             public ProcessModule Module;
         }
 
@@ -36,7 +36,7 @@ namespace VibrateGames
                 if (process.MainModule?.ModuleName == moduleName)
                 {
                     int PROCESS_VM_READ = 0x0010;
-                    IntPtr handle = OpenProcess(PROCESS_VM_READ, false, process.Id);
+                    nint handle = OpenProcess(PROCESS_VM_READ, false, process.Id);
                     return new ProcessInfo(handle, process.MainModule);
                 }
             }
@@ -59,7 +59,7 @@ namespace VibrateGames
             public readonly byte?[] AOB;
             public readonly int[]? Offsets;
 
-            public IntPtr Address;
+            public nint Address;
 
             /// <summary>
             /// Converts a string representation of bytes to search for into an array
@@ -82,9 +82,9 @@ namespace VibrateGames
         /// <param name="process">The process to search through</param>
         /// <param name="aobParams"></param>
         /// <returns>Pointer to the location of the AOB in memory</returns>
-        public static void FindAOB(ProcessInfo process, List<AOBParam> aobParams)
+        public static void FindAOBs(ProcessInfo process, List<AOBParam> aobParams)
         {
-            int size = 65536; // Number of bytes to read at once
+            int size = 0x10000; // Number of bytes to read at once
             int bytesToCopy = size + LongestAOB(aobParams);
             byte[] processMemory = new byte[bytesToCopy];
 
@@ -93,6 +93,10 @@ namespace VibrateGames
                 if (index % size == 0)
                 {
                     // Get next chunk of memory
+                    if (bytesToCopy + index > process.Module.ModuleMemorySize)
+                    {
+                        bytesToCopy = process.Module.ModuleMemorySize - index;
+                    }
                     ReadProcessMemory(process.Handle, process.Module.BaseAddress + index, processMemory, bytesToCopy, out _);
                 }
 
@@ -147,7 +151,7 @@ namespace VibrateGames
         public static Instruction Disassemble(byte[] byteCode)
         {
             ByteArrayCodeReader codeReader = new(byteCode);
-            Decoder decoder = Decoder.Create(64, codeReader);
+            var decoder = Decoder.Create(64, codeReader);
             return decoder.Decode();
         }
 
@@ -158,13 +162,13 @@ namespace VibrateGames
         /// <param name="baseAddress"></param>
         /// <param name="offsets"></param>
         /// <returns></returns>
-        public static IntPtr RunPointerOffsets(IntPtr proccessHandle, IntPtr baseAddress, int[] offsets)
+        public static nint RunPointerOffsets(nint proccessHandle, nint baseAddress, int[] offsets)
         {
             byte[] buffer = new byte[8];
 
             // Initial Pointer
             ReadProcessMemory(proccessHandle, baseAddress, buffer, 8, out _);
-            IntPtr pointer = (nint)BitConverter.ToInt64(buffer, 0);
+            nint pointer = (nint)BitConverter.ToInt64(buffer, 0);
 
             // Run through offsets
             foreach (int offset in offsets)

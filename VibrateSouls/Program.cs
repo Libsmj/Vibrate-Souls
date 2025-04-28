@@ -1,4 +1,4 @@
-namespace VibrateGames
+namespace VibrateSouls
 {
     internal static class Program
     {
@@ -11,7 +11,7 @@ namespace VibrateGames
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new VibrateGames());
+            Application.Run(new VibrateSouls());
         }
     }
 }

@@ -1,5 +1,5 @@
 Uses [Intiface Central](https://intiface.com/central/) to connect to devices.  
-Download and extract latest release, run VibrateGames.exe to scan for games and Intiface.  
+Download and extract latest release, run VibrateSouls.exe to scan for games and Intiface.  
 Automatically vibrates all connected devices when HP decreases.
 
 Current supported games:

@@ -1,15 +1,15 @@
 ﻿using Iced.Intel;
 using System.Text;
-using static VibrateGames.MemoryHelper;
+using static VibrateSouls.MemoryHelper;
 
-namespace VibrateGames
+namespace VibrateSouls
 {
     internal class EldenRingDataHelper
     {
         public readonly PlayerParams PlayerParams;
 
         private readonly ProcessInfo EldenRingProcess;
-        private IntPtr GameDataMan;
+        private nint GameDataMan;
 
         public EldenRingDataHelper(ProcessInfo eldenRingProcess)
         {
@@ -27,7 +27,7 @@ namespace VibrateGames
             List<AOBParam> aobs = [gameDataManAOB, worldChrManAOB, gameManAOB];
 
             // Find the address instruction to disassemble
-            FindAOB(EldenRingProcess, aobs);
+            FindAOBs(EldenRingProcess, aobs);
 
             // Get the machine code to disassemble to find address of GameDataMan
             byte[] buffer = new byte[7];
@@ -40,10 +40,10 @@ namespace VibrateGames
 
     public class PlayerParams
     {
-        private readonly IntPtr processHandle;
-        private readonly IntPtr playerParamAddress; 
+        private readonly nint processHandle;
+        private readonly nint playerParamAddress; 
 
-        public PlayerParams(IntPtr eldenRingProcessHandle, IntPtr gameDataMan)
+        public PlayerParams(nint eldenRingProcessHandle, nint gameDataMan)
         {
             processHandle = eldenRingProcessHandle;
             playerParamAddress = RunPointerOffsets(processHandle, gameDataMan, [0x08]);
