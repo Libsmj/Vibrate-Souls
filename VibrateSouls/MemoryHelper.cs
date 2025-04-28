@@ -82,9 +82,9 @@ namespace VibrateGames
         /// <param name="process">The process to search through</param>
         /// <param name="aobParams"></param>
         /// <returns>Pointer to the location of the AOB in memory</returns>
-        public static void FindAOB(ProcessInfo process, List<AOBParam> aobParams)
+        public static void FindAOBs(ProcessInfo process, List<AOBParam> aobParams)
         {
-            int size = 65536; // Number of bytes to read at once
+            int size = 0x10000; // Number of bytes to read at once
             int bytesToCopy = size + LongestAOB(aobParams);
             byte[] processMemory = new byte[bytesToCopy];
 
@@ -93,6 +93,10 @@ namespace VibrateGames
                 if (index % size == 0)
                 {
                     // Get next chunk of memory
+                    if (bytesToCopy + index > process.Module.ModuleMemorySize)
+                    {
+                        bytesToCopy = process.Module.ModuleMemorySize - index;
+                    }
                     ReadProcessMemory(process.Handle, process.Module.BaseAddress + index, processMemory, bytesToCopy, out _);
                 }
 

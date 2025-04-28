@@ -4,7 +4,7 @@
     <_LastSelectedProfileId>C:\Users\Jacob\source\repos\VibrateGames\VibrateGames\Properties\PublishProfiles\Portable.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="VibrateGames.cs">
+    <Compile Update="VibrateSouls.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>

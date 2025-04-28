@@ -1,6 +1,6 @@
 ﻿namespace VibrateGames
 {
-    partial class VibrateGames
+    partial class VibrateSouls
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VibrateGames));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VibrateSouls));
             VibrateButton = new Button();
             RescanButton = new Button();
             DeviceStatusLabel = new Label();

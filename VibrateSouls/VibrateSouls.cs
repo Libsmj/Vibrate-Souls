@@ -2,7 +2,7 @@ using Buttplug.Client;
 
 namespace VibrateGames
 {
-    public partial class VibrateGames : Form
+    public partial class VibrateSouls : Form
     {
         private ButtplugClient? bpClient;
         private EldenRingDataHelper? eldenRingDataHelper;
@@ -12,7 +12,7 @@ namespace VibrateGames
 
         private string serverAddress = "ws://127.0.0.1:12345/";
 
-        public VibrateGames()
+        public VibrateSouls()
         {
             InitializeComponent();
             InitializeClient();
@@ -180,7 +180,7 @@ namespace VibrateGames
                 previousHp = hp;
                 previousName = name;
 
-                HealthPointsLabel.Text = "HP: " + hp;
+                HealthPointsLabel.Text = "HP: " + (name != "" ? hp : "");
                 await Task.Delay(pollingRate);
             }
         }

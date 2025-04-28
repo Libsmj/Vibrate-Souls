@@ -27,7 +27,7 @@ namespace VibrateGames
             List<AOBParam> aobs = [gameDataManAOB, worldChrManAOB, gameManAOB];
 
             // Find the address instruction to disassemble
-            FindAOB(EldenRingProcess, aobs);
+            FindAOBs(EldenRingProcess, aobs);
 
             // Get the machine code to disassemble to find address of GameDataMan
             byte[] buffer = new byte[7];
