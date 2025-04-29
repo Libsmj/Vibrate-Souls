@@ -2,6 +2,8 @@ Uses [Intiface Central](https://intiface.com/central/) to connect to devices.
 Download and extract latest release, run VibrateSouls.exe to scan for games and Intiface.  
 Automatically vibrates all connected devices when HP decreases.
 
+Disabling [Easy Anti Cheat](https://soulsspeedruns.com/eldenring/eac-bypass/) is recommended.
+
 Current supported games:
 * Elden Ring
 
