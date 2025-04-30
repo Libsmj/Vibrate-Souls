@@ -1,10 +1,13 @@
 using Buttplug.Client;
+using MaterialSkin;
+using MaterialSkin.Controls;
 
 namespace VibrateSouls
 {
-    public partial class VibrateSouls : Form
+    public partial class VibrateSouls : MaterialForm
     {
         private ButtplugClient? bpClient;
+        //private DarkSouls2DataHelper? darkSouls2DataHelper;
         private EldenRingDataHelper? eldenRingDataHelper;
 
         private static readonly int pollingRate = 10;
@@ -15,8 +18,19 @@ namespace VibrateSouls
         public VibrateSouls()
         {
             InitializeComponent();
+
+            SetTheme();
+
             InitializeClient();
             DetectEldenRing();
+        }
+
+        private void SetTheme()
+        {
+            MaterialSkinManager materialSkinManager = MaterialSkinManager.Instance;
+            materialSkinManager.AddFormToManage(this);
+            materialSkinManager.Theme = MaterialSkinManager.Themes.DARK;
+            materialSkinManager.ColorScheme = new ColorScheme(Primary.BlueGrey800, Primary.BlueGrey900, Primary.BlueGrey500, Accent.LightBlue200, TextShade.WHITE);
         }
 
         #region Event Handlers
@@ -50,7 +64,6 @@ namespace VibrateSouls
             IntifaceConnectButton.Enabled = false;
             RescanButton.Enabled = false;
             VibrateButton.Enabled = false;
-            VibrationsEnabledButton.Enabled = false;
             DeviceStatusLabel.Text = "Connecting to server...";
 
             if (bpClient != null)
@@ -77,7 +90,6 @@ namespace VibrateSouls
         {
             RescanButton.Enabled = false;
             VibrateButton.Enabled = false;
-            VibrationsEnabledButton.Enabled = false;
 
             if (bpClient == null)
             {
@@ -115,7 +127,6 @@ namespace VibrateSouls
             else
             {
                 VibrateButton.Enabled = true;
-                VibrationsEnabledButton.Enabled = true;
                 DeviceStatusLabel.Text = numDevices > 1 ? numDevices.ToString() + " devices found" : "1 device found";
             }
         }
@@ -129,7 +140,9 @@ namespace VibrateSouls
             try
             {
                 foreach (ButtplugClientDevice? device in bpClient.Devices)
+                {
                     await device.VibrateAsync(1);
+                }
 
                 await Task.Delay(1000);
                 await bpClient.StopAllDevicesAsync(cancellationToken);
@@ -143,6 +156,7 @@ namespace VibrateSouls
 
         private void DetectEldenRing()
         {
+            //MemoryHelper.ProcessInfo? darksouls2 = MemoryHelper.FindProcess("darksoulsii", "DarkSoulsII.exe");
             MemoryHelper.ProcessInfo? eldenRing = MemoryHelper.FindProcess("eldenring", "eldenring.exe");
             if (eldenRing == null)
             {
