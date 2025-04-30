@@ -19,6 +19,9 @@ namespace VibrateSouls
         {
             InitializeComponent();
 
+            TabControl.ShowToolTips = true;
+            TabPage_EldenRing.ToolTipText = "test";
+
             SetTheme();
 
             InitializeClient();

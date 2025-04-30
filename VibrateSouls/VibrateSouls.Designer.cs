@@ -36,14 +36,18 @@
             IntifaceConnectButton = new MaterialSkin.Controls.MaterialButton();
             materialCheckbox1 = new MaterialSkin.Controls.MaterialCheckbox();
             materialCheckbox2 = new MaterialSkin.Controls.MaterialCheckbox();
-            VibrateSoulsTabControl = new MaterialSkin.Controls.MaterialTabControl();
+            TabControl = new MaterialSkin.Controls.MaterialTabControl();
             TabPage_Home = new TabPage();
             TabPage_EldenRing = new TabPage();
             HealthPointsLabel = new Label();
             DetectEldenRingButton = new MaterialSkin.Controls.MaterialButton();
             DetectEldenRingLabel = new Label();
+            TabPage_DS1 = new TabPage();
+            TabPage_DS1R = new TabPage();
+            TabPage_DS2 = new TabPage();
+            TabPage_DS3 = new TabPage();
             MenuTabIcons = new ImageList(components);
-            VibrateSoulsTabControl.SuspendLayout();
+            TabControl.SuspendLayout();
             TabPage_Home.SuspendLayout();
             TabPage_EldenRing.SuspendLayout();
             SuspendLayout();
@@ -57,7 +61,7 @@
             VibrateButton.Font = new Font("Microsoft Sans Serif", 12F);
             VibrateButton.HighEmphasis = true;
             VibrateButton.Icon = null;
-            VibrateButton.Location = new Point(81, 155);
+            VibrateButton.Location = new Point(6, 89);
             VibrateButton.Margin = new Padding(3, 9, 3, 3);
             VibrateButton.MouseState = MaterialSkin.MouseState.HOVER;
             VibrateButton.Name = "VibrateButton";
@@ -79,7 +83,7 @@
             RescanButton.Font = new Font("Microsoft Sans Serif", 12F);
             RescanButton.HighEmphasis = true;
             RescanButton.Icon = null;
-            RescanButton.Location = new Point(197, 78);
+            RescanButton.Location = new Point(122, 12);
             RescanButton.Margin = new Padding(3, 9, 3, 3);
             RescanButton.MouseState = MaterialSkin.MouseState.HOVER;
             RescanButton.Name = "RescanButton";
@@ -96,7 +100,7 @@
             // 
             DeviceStatusLabel.AutoSize = true;
             DeviceStatusLabel.Font = new Font("Microsoft Sans Serif", 12F);
-            DeviceStatusLabel.Location = new Point(81, 126);
+            DeviceStatusLabel.Location = new Point(6, 60);
             DeviceStatusLabel.Margin = new Padding(3, 9, 3, 0);
             DeviceStatusLabel.Name = "DeviceStatusLabel";
             DeviceStatusLabel.Size = new Size(167, 20);
@@ -112,7 +116,7 @@
             IntifaceConnectButton.Font = new Font("Microsoft Sans Serif", 12F);
             IntifaceConnectButton.HighEmphasis = true;
             IntifaceConnectButton.Icon = null;
-            IntifaceConnectButton.Location = new Point(81, 78);
+            IntifaceConnectButton.Location = new Point(6, 12);
             IntifaceConnectButton.Margin = new Padding(3, 9, 6, 3);
             IntifaceConnectButton.MouseState = MaterialSkin.MouseState.HOVER;
             IntifaceConnectButton.Name = "IntifaceConnectButton";
@@ -151,20 +155,25 @@
             materialCheckbox2.Size = new Size(104, 37);
             materialCheckbox2.TabIndex = 0;
             // 
-            // VibrateSoulsTabControl
+            // TabControl
             // 
-            VibrateSoulsTabControl.Controls.Add(TabPage_Home);
-            VibrateSoulsTabControl.Controls.Add(TabPage_EldenRing);
-            VibrateSoulsTabControl.Depth = 0;
-            VibrateSoulsTabControl.Dock = DockStyle.Fill;
-            VibrateSoulsTabControl.ImageList = MenuTabIcons;
-            VibrateSoulsTabControl.Location = new Point(3, 64);
-            VibrateSoulsTabControl.MouseState = MaterialSkin.MouseState.HOVER;
-            VibrateSoulsTabControl.Multiline = true;
-            VibrateSoulsTabControl.Name = "VibrateSoulsTabControl";
-            VibrateSoulsTabControl.SelectedIndex = 0;
-            VibrateSoulsTabControl.Size = new Size(824, 588);
-            VibrateSoulsTabControl.TabIndex = 8;
+            TabControl.Controls.Add(TabPage_Home);
+            TabControl.Controls.Add(TabPage_EldenRing);
+            TabControl.Controls.Add(TabPage_DS1);
+            TabControl.Controls.Add(TabPage_DS1R);
+            TabControl.Controls.Add(TabPage_DS2);
+            TabControl.Controls.Add(TabPage_DS3);
+            TabControl.Depth = 0;
+            TabControl.Dock = DockStyle.Fill;
+            TabControl.ImageList = MenuTabIcons;
+            TabControl.Location = new Point(3, 64);
+            TabControl.MouseState = MaterialSkin.MouseState.HOVER;
+            TabControl.Multiline = true;
+            TabControl.Name = "TabControl";
+            TabControl.SelectedIndex = 0;
+            TabControl.ShowToolTips = true;
+            TabControl.Size = new Size(794, 606);
+            TabControl.TabIndex = 8;
             // 
             // TabPage_Home
             // 
@@ -172,11 +181,11 @@
             TabPage_Home.Controls.Add(VibrateButton);
             TabPage_Home.Controls.Add(RescanButton);
             TabPage_Home.Controls.Add(DeviceStatusLabel);
-            TabPage_Home.ImageKey = "sync-512.png";
+            TabPage_Home.ImageKey = "Sync";
             TabPage_Home.Location = new Point(4, 39);
             TabPage_Home.Name = "TabPage_Home";
             TabPage_Home.Padding = new Padding(3);
-            TabPage_Home.Size = new Size(816, 545);
+            TabPage_Home.Size = new Size(786, 563);
             TabPage_Home.TabIndex = 0;
             TabPage_Home.Text = "Home";
             TabPage_Home.UseVisualStyleBackColor = true;
@@ -187,11 +196,11 @@
             TabPage_EldenRing.Controls.Add(HealthPointsLabel);
             TabPage_EldenRing.Controls.Add(DetectEldenRingButton);
             TabPage_EldenRing.Controls.Add(DetectEldenRingLabel);
-            TabPage_EldenRing.ImageKey = "EldenRing.png";
+            TabPage_EldenRing.ImageKey = "EldenRing_256x256.png";
             TabPage_EldenRing.Location = new Point(4, 39);
             TabPage_EldenRing.Name = "TabPage_EldenRing";
             TabPage_EldenRing.Padding = new Padding(3);
-            TabPage_EldenRing.Size = new Size(816, 545);
+            TabPage_EldenRing.Size = new Size(786, 563);
             TabPage_EldenRing.TabIndex = 1;
             TabPage_EldenRing.Text = "Elden Ring";
             TabPage_EldenRing.ToolTipText = "Elden Ring Settings";
@@ -238,27 +247,78 @@
             DetectEldenRingLabel.TabIndex = 7;
             DetectEldenRingLabel.Text = "Detecting Elden Ring...";
             // 
+            // TabPage_DS1
+            // 
+            TabPage_DS1.ImageKey = "DS1-PTDE_256x256.png";
+            TabPage_DS1.Location = new Point(4, 39);
+            TabPage_DS1.Name = "TabPage_DS1";
+            TabPage_DS1.Padding = new Padding(3);
+            TabPage_DS1.Size = new Size(786, 563);
+            TabPage_DS1.TabIndex = 3;
+            TabPage_DS1.Text = "Dark Souls: PTDE";
+            TabPage_DS1.ToolTipText = "Dark Souls: Prepare To Die Edition";
+            TabPage_DS1.UseVisualStyleBackColor = true;
+            // 
+            // TabPage_DS1R
+            // 
+            TabPage_DS1R.ImageKey = "DS1-R_256x256.png";
+            TabPage_DS1R.Location = new Point(4, 39);
+            TabPage_DS1R.Name = "TabPage_DS1R";
+            TabPage_DS1R.Padding = new Padding(3);
+            TabPage_DS1R.Size = new Size(786, 563);
+            TabPage_DS1R.TabIndex = 4;
+            TabPage_DS1R.Text = "Dark Souls: R";
+            TabPage_DS1R.ToolTipText = "Dark Souls: Remastered";
+            TabPage_DS1R.UseVisualStyleBackColor = true;
+            // 
+            // TabPage_DS2
+            // 
+            TabPage_DS2.ImageKey = "DS2-SOTFS_256x256.png";
+            TabPage_DS2.Location = new Point(4, 39);
+            TabPage_DS2.Name = "TabPage_DS2";
+            TabPage_DS2.Padding = new Padding(3);
+            TabPage_DS2.Size = new Size(786, 563);
+            TabPage_DS2.TabIndex = 2;
+            TabPage_DS2.Text = "Dark Souls 2: SotFS";
+            TabPage_DS2.ToolTipText = "Dark Souls 2: Scholar of the First Sin";
+            TabPage_DS2.UseVisualStyleBackColor = true;
+            // 
+            // TabPage_DS3
+            // 
+            TabPage_DS3.ImageKey = "DS3_256x256.png";
+            TabPage_DS3.Location = new Point(4, 39);
+            TabPage_DS3.Name = "TabPage_DS3";
+            TabPage_DS3.Padding = new Padding(3);
+            TabPage_DS3.Size = new Size(786, 563);
+            TabPage_DS3.TabIndex = 5;
+            TabPage_DS3.Text = "Dark Souls 3";
+            TabPage_DS3.ToolTipText = "Dark Souls 3";
+            TabPage_DS3.UseVisualStyleBackColor = true;
+            // 
             // MenuTabIcons
             // 
             MenuTabIcons.ColorDepth = ColorDepth.Depth32Bit;
             MenuTabIcons.ImageStream = (ImageListStreamer)resources.GetObject("MenuTabIcons.ImageStream");
             MenuTabIcons.TransparentColor = Color.Transparent;
-            MenuTabIcons.Images.SetKeyName(0, "EldenRing.png");
-            MenuTabIcons.Images.SetKeyName(1, "sync-512.png");
-            MenuTabIcons.Images.SetKeyName(2, "256x256.png");
+            MenuTabIcons.Images.SetKeyName(0, "Sync");
+            MenuTabIcons.Images.SetKeyName(1, "DS1-PTDE_256x256.png");
+            MenuTabIcons.Images.SetKeyName(2, "DS1-R_256x256.png");
+            MenuTabIcons.Images.SetKeyName(3, "DS2-SOTFS_256x256.png");
+            MenuTabIcons.Images.SetKeyName(4, "DS3_256x256.png");
+            MenuTabIcons.Images.SetKeyName(5, "EldenRing_256x256.png");
             // 
             // VibrateSouls
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(830, 655);
-            Controls.Add(VibrateSoulsTabControl);
+            ClientSize = new Size(800, 673);
+            Controls.Add(TabControl);
             DrawerShowIconsWhenHidden = true;
-            DrawerTabControl = VibrateSoulsTabControl;
+            DrawerTabControl = TabControl;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "VibrateSouls";
             Text = "Vibrate Souls";
-            VibrateSoulsTabControl.ResumeLayout(false);
+            TabControl.ResumeLayout(false);
             TabPage_Home.ResumeLayout(false);
             TabPage_Home.PerformLayout();
             TabPage_EldenRing.ResumeLayout(false);
@@ -274,12 +334,16 @@
         private MaterialSkin.Controls.MaterialButton IntifaceConnectButton;
         private MaterialSkin.Controls.MaterialCheckbox materialCheckbox1;
         private MaterialSkin.Controls.MaterialCheckbox materialCheckbox2;
-        private MaterialSkin.Controls.MaterialTabControl VibrateSoulsTabControl;
+        private MaterialSkin.Controls.MaterialTabControl TabControl;
         private TabPage TabPage_Home;
         private TabPage TabPage_EldenRing;
         private Label HealthPointsLabel;
         private MaterialSkin.Controls.MaterialButton DetectEldenRingButton;
         private Label DetectEldenRingLabel;
         private ImageList MenuTabIcons;
+        private TabPage TabPage_DS2;
+        private TabPage TabPage_DS1;
+        private TabPage TabPage_DS1R;
+        private TabPage TabPage_DS3;
     }
 }
