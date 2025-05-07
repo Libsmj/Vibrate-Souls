@@ -1,22 +1,59 @@
 ﻿using Iced.Intel;
+using System.Diagnostics;
 using System.Text;
-using static VibrateSouls.MemoryHelper;
+using static VibrateSoulsCore.MemoryHelper;
 
-namespace VibrateSouls
+namespace VibrateSoulsCore
 {
-    internal class EldenRingDataHelper
+    public class EldenRingDataHelper : GameDataHelper
     {
         public readonly PlayerParams PlayerParams;
 
-        private readonly ProcessInfo EldenRingProcess;
-        private nint GameDataMan;
+        private static string ProcessName = "eldenring";
+        private static string ModuleName = "eldenring.exe";
 
-        public EldenRingDataHelper(ProcessInfo eldenRingProcess)
+        private nint GameDataMan;
+        private bool GetUpdates;
+        private readonly Thread StatUpdate;
+
+        public EldenRingDataHelper() 
+            : base()
         {
-            EldenRingProcess = eldenRingProcess;
             SetGameDataManAddress();
 
-            PlayerParams = new PlayerParams(eldenRingProcess.Handle, GameDataMan);
+            PlayerParams = new PlayerParams(ProcessInfo.OpenHandle, GameDataMan);
+            StatUpdate = new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                GetUpdates = true;
+                UpdateStats();
+            });
+            StatUpdate.Start();
+        }
+
+        public void EndUpdates()
+        {
+            GetUpdates = false;
+            StatUpdate.Join();
+        }
+
+        internal override void UpdateStats()
+        {
+            int previousHp = PlayerParams.Hp;
+            string previousName = PlayerParams.PlayerName;
+            while (GetUpdates)
+            {
+                PlayerParams.UpdateStats();
+
+                if (PlayerParams.Hp < previousHp && previousName == PlayerParams.PlayerName)
+                {
+                    OnGameDataChanged(new GameEventArgs(previousHp - PlayerParams.Hp));
+                }
+
+                previousHp = PlayerParams.Hp;
+                previousName = PlayerParams.PlayerName;
+                Thread.Sleep(100);
+            }
         }
 
         private void SetGameDataManAddress()
@@ -27,11 +64,11 @@ namespace VibrateSouls
             List<AOBParam> aobs = [gameDataManAOB, worldChrManAOB, gameManAOB];
 
             // Find the address instruction to disassemble
-            FindAOBs(EldenRingProcess, aobs);
+            FindAOBs(ProcessInfo, aobs);
 
             // Get the machine code to disassemble to find address of GameDataMan
             byte[] buffer = new byte[7];
-            ReadProcessMemory(EldenRingProcess.Handle, gameDataManAOB.Address, buffer, 7, out _);
+            ReadProcessMemory(ProcessInfo.OpenHandle, gameDataManAOB.Address, buffer, 7, out _);
             Instruction instruction = Disassemble(buffer);
 
             GameDataMan = gameDataManAOB.Address + (nint)instruction.MemoryDisplacement64;
@@ -40,13 +77,13 @@ namespace VibrateSouls
 
     public class PlayerParams
     {
-        private readonly nint processHandle;
-        private readonly nint playerParamAddress; 
+        private readonly nint OpenHandle;
+        private readonly nint PlayerParamAddress; 
 
-        public PlayerParams(nint eldenRingProcessHandle, nint gameDataMan)
+        public PlayerParams(nint openHandle, nint gameDataMan)
         {
-            processHandle = eldenRingProcessHandle;
-            playerParamAddress = RunPointerOffsets(processHandle, gameDataMan, [0x08]);
+            OpenHandle = openHandle;
+            PlayerParamAddress = RunPointerOffsets(OpenHandle, gameDataMan, [0x08]);
         }
 
         public void UpdateStats()
@@ -54,7 +91,7 @@ namespace VibrateSouls
             int size = 0xFD + 0x01;
             byte[] buffer = new byte[size];
 
-            ReadProcessMemory(processHandle, playerParamAddress, buffer, size + 0x04, out _);
+            ReadProcessMemory(OpenHandle, PlayerParamAddress, buffer, size + 0x04, out _);
             Hp = BitConverter.ToInt32(buffer, 0x10);
             MaxHp = BitConverter.ToInt32(buffer, 0x14);
             BaseMaxHp = BitConverter.ToInt32(buffer, 0x18);

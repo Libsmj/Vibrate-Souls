@@ -1,31 +1,21 @@
-using Buttplug.Client;
 using MaterialSkin;
 using MaterialSkin.Controls;
+using VibrateSoulsCore;
 
 namespace VibrateSouls
 {
     public partial class VibrateSouls : MaterialForm
     {
-        private ButtplugClient? bpClient;
-        //private DarkSouls2DataHelper? darkSouls2DataHelper;
-        private EldenRingDataHelper? eldenRingDataHelper;
-
-        private static readonly int pollingRate = 10;
-        private static readonly CancellationToken cancellationToken = CancellationToken.None;
-
-        private string serverAddress = "ws://127.0.0.1:12345/";
+        private readonly ButtPlugHelper BpHelper;
 
         public VibrateSouls()
         {
             InitializeComponent();
 
-            TabControl.ShowToolTips = true;
-            TabPage_EldenRing.ToolTipText = "test";
+            BpHelper = new ButtPlugHelper("ws://127.0.0.1:12345/");
 
             SetTheme();
-
-            InitializeClient();
-            DetectEldenRing();
+            InitializeBp();
         }
 
         private void SetTheme()
@@ -36,169 +26,88 @@ namespace VibrateSouls
             materialSkinManager.ColorScheme = new ColorScheme(Primary.BlueGrey800, Primary.BlueGrey900, Primary.BlueGrey500, Accent.LightBlue200, TextShade.WHITE);
         }
 
-        #region Event Handlers
+        #region BP Client
+
+        private void InitializeBp()
+        {
+            BpHelper.ConnectionAttemptFinished += CheckConnectionChanged;
+            BpHelper.DeviceListChanged += DeviceCountChanged;
+
+            BpHelper.InitializeClient();
+        }
+
+        private void CheckConnectionChanged(object? sender, EventArgs e)
+        {
+            UpdateServerStatus();
+            UpdateDeviceCount();
+        }
+
+        private void DeviceCountChanged(object? sender, EventArgs e)
+        {
+            UpdateDeviceCount();
+        }
 
         private void IntifaceConnectButton_Click(object sender, EventArgs e)
         {
-            InitializeClient();
+            ConnectionStatus_Label.Text = "Connecting to server...";
+            BpHelper.InitializeClient();
         }
 
-        private void RescanButton_Click(object sender, EventArgs e)
+        private void VibrateButton_Click(object sender, EventArgs e)
         {
-            DetectDevices();
+            BpHelper.VibrateAll();
         }
 
-        private void VibrateButton_Clicked(object sender, EventArgs e)
+        private void UpdateDeviceCount()
         {
-            VibrateAll();
+            int deviceCount = BpHelper.BpClient.Connected ? BpHelper.BpClient.Devices.Length : 0;
+            string text = string.Format("Devices: {0}", deviceCount);
+            bool vibrateEnabled = deviceCount > 0;
+
+            WriteTextSafe(DeviceCount_Label, text);
+            SetEnabledSafe(VibrateAll_Button, vibrateEnabled);
         }
 
-        private void DetectEldenRing_Click(object sender, EventArgs e)
+        private void UpdateServerStatus()
         {
-            DetectEldenRing();
-        }
-
-        #endregion
-
-        #region Buttplug Stuff
-
-        private async void InitializeClient()
-        {
-            IntifaceConnectButton.Enabled = false;
-            RescanButton.Enabled = false;
-            VibrateButton.Enabled = false;
-            DeviceStatusLabel.Text = "Connecting to server...";
-
-            if (bpClient != null)
-            {
-                // Disconnect from current connection
-                await bpClient.DisconnectAsync();
-            }
-
-            try
-            {
-                bpClient = new("Vibrate Souls");
-                ButtplugWebsocketConnector connector = new(new Uri(serverAddress));
-                await bpClient.ConnectAsync(connector);
-                DetectDevices();
-            }
-            catch (Exception)
-            {
-                DeviceStatusLabel.Text = "Could not connect to server";
-            }
-            IntifaceConnectButton.Enabled = true;
-        }
-
-        private async void DetectDevices()
-        {
-            RescanButton.Enabled = false;
-            VibrateButton.Enabled = false;
-
-            if (bpClient == null)
-            {
-                DeviceStatusLabel.Text = "Could not connect to server";
-                return;
-            }
-            DeviceStatusLabel.Text = "Scanning...";
-            try
-            {
-                await bpClient.StartScanningAsync(cancellationToken);
-                await Task.Delay(100);
-                await bpClient.StopScanningAsync(cancellationToken);
-                RescanButton.Enabled = true;
-                SetNumDeviceText();
-            }
-            catch
-            {
-                DeviceStatusLabel.Text = "Disconnected, reconnecting...";
-                InitializeClient();
-            }
-        }
-
-        private void SetNumDeviceText()
-        {
-            if (bpClient == null)
-            {
-                return;
-            }
-            int numDevices = bpClient.Devices.Length;
-            if (numDevices == 0)
-            {
-                VibrateButton.Enabled = false;
-                DeviceStatusLabel.Text = "No devices found";
-            }
-            else
-            {
-                VibrateButton.Enabled = true;
-                DeviceStatusLabel.Text = numDevices > 1 ? numDevices.ToString() + " devices found" : "1 device found";
-            }
-        }
-
-        public async void VibrateAll()
-        {
-            if (bpClient == null || bpClient.Devices.Length == 0)
-            {
-                return;
-            }
-            try
-            {
-                foreach (ButtplugClientDevice? device in bpClient.Devices)
-                {
-                    await device.VibrateAsync(1);
-                }
-
-                await Task.Delay(1000);
-                await bpClient.StopAllDevicesAsync(cancellationToken);
-            }
-            catch (Exception) { }
+            string text = BpHelper.BpClient.Connected ? "Connected to server." : "Could not connect to server";
+            WriteTextSafe(ConnectionStatus_Label, text);
+            SetEnabledSafe(IntifaceConnect_Button, !BpHelper.BpClient.Connected);
         }
 
         #endregion
 
         #region Elden Ring
 
-        private void DetectEldenRing()
+        
+
+        #endregion
+
+        #region Misc
+
+        private void WriteTextSafe(Control control, string text)
         {
-            //MemoryHelper.ProcessInfo? darksouls2 = MemoryHelper.FindProcess("darksoulsii", "DarkSoulsII.exe");
-            MemoryHelper.ProcessInfo? eldenRing = MemoryHelper.FindProcess("eldenring", "eldenring.exe");
-            if (eldenRing == null)
+            if (control.InvokeRequired)
             {
-                eldenRingDataHelper = null;
-                DetectEldenRingButton.Enabled = true;
-                DetectEldenRingLabel.Text = "Elden Ring not found";
-                return;
+                void safeWrite() { WriteTextSafe(control, text); }
+                control.Invoke(safeWrite);
             }
-            eldenRingDataHelper = new EldenRingDataHelper(eldenRing);
-            DetectEldenRingButton.Enabled = true;
-            DetectEldenRingLabel.Text = "Elden Ring detected";
-            ScanPlayerParams();
+            else
+            {
+                control.Text = text;
+            }
         }
 
-        private async void ScanPlayerParams()
+        private void SetEnabledSafe(Control control, bool enabled)
         {
-            if (eldenRingDataHelper == null)
+            if (control.InvokeRequired)
             {
-                return;
+                void safeWrite() { SetEnabledSafe(control, enabled); }
+                control.Invoke(safeWrite);
             }
-            eldenRingDataHelper.PlayerParams.UpdateStats();
-            int previousHp = eldenRingDataHelper.PlayerParams.Hp;
-            string previousName = eldenRingDataHelper.PlayerParams.PlayerName;
-
-            while (true)
+            else
             {
-                eldenRingDataHelper.PlayerParams.UpdateStats();
-
-                int hp = eldenRingDataHelper.PlayerParams.Hp;
-                string name = eldenRingDataHelper.PlayerParams.PlayerName;
-                if (hp < previousHp && name == previousName)
-                {
-                    VibrateAll();
-                }
-                previousHp = hp;
-                previousName = name;
-
-                HealthPointsLabel.Text = "HP: " + (name != "" ? hp : "");
-                await Task.Delay(pollingRate);
+                control.Enabled = enabled;
             }
         }
 

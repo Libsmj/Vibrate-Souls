@@ -1,34 +1,42 @@
 ﻿using Iced.Intel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
-namespace VibrateSouls
+namespace VibrateSoulsCore
 {
-    public static class MemoryHelper
+    public static partial class MemoryHelper
     {
         #region Process Info
-        [DllImport("kernel32.dll")]
-        [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
-        internal static extern nint OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+        [LibraryImport("kernel32.dll")]
+        internal static partial nint OpenProcess(int dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, int dwProcessId);
 
-        [DllImport("kernel32.dll")]
-        [SuppressMessage("Interoperability", "SYSLIB1054:Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time", Justification = "<Pending>")]
-        internal static extern bool ReadProcessMemory(nint hProcess, nint lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool CloseHandle(nint hProcess);
 
-        public class ProcessInfo
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool ReadProcessMemory(nint hProcess, nint lpBaseAddress, [Out]byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
+
+        public class VsProcess
         {
-            public ProcessInfo(nint processHandle, ProcessModule module)
+            public VsProcess(Process process, nint handle)
             {
-                Handle = processHandle;
-                Module = module;
+                GameProcess = process;
+                if (process.MainModule == null) 
+                {
+                    throw new Exception("Module was not found");
+                }
+                Module = process.MainModule;
+                OpenHandle = handle;
             }
 
-            public nint Handle;
+            public Process GameProcess;
             public ProcessModule Module;
+            public nint OpenHandle;
         }
 
-        public static ProcessInfo? FindProcess(string name, string moduleName)
+        public static VsProcess? FindProcess(string name, string moduleName)
         {
             Process[] processes = Process.GetProcessesByName(name);
             foreach (Process process in processes)
@@ -37,7 +45,9 @@ namespace VibrateSouls
                 {
                     int PROCESS_VM_READ = 0x0010;
                     nint handle = OpenProcess(PROCESS_VM_READ, false, process.Id);
-                    return new ProcessInfo(handle, process.MainModule);
+                    VsProcess vsProcess = new VsProcess(process, handle);
+                    
+                    return vsProcess;
                 }
             }
             return null;
@@ -82,11 +92,12 @@ namespace VibrateSouls
         /// <param name="process">The process to search through</param>
         /// <param name="aobParams"></param>
         /// <returns>Pointer to the location of the AOB in memory</returns>
-        public static void FindAOBs(ProcessInfo process, List<AOBParam> aobParams)
+        public static void FindAOBs(VsProcess process, List<AOBParam> aobParams)
         {
             int size = 0x10000; // Number of bytes to read at once
             int bytesToCopy = size + LongestAOB(aobParams);
             byte[] processMemory = new byte[bytesToCopy];
+
 
             for (int index = 0; index < process.Module.ModuleMemorySize; index++)
             {
@@ -97,7 +108,7 @@ namespace VibrateSouls
                     {
                         bytesToCopy = process.Module.ModuleMemorySize - index;
                     }
-                    ReadProcessMemory(process.Handle, process.Module.BaseAddress + index, processMemory, bytesToCopy, out _);
+                    ReadProcessMemory(process.OpenHandle, process.Module.BaseAddress + index, processMemory, bytesToCopy, out _);
                 }
 
                 for (int aobIndex = 0; aobIndex < aobParams.Count; aobIndex++)

@@ -1,22 +1,22 @@
 ﻿using Iced.Intel;
 using System.Text;
-using static VibrateSouls.MemoryHelper;
+using static VibrateSoulsCore.MemoryHelper;
 
-namespace VibrateSouls
+namespace VibrateSoulsCore
 {
-    internal class DarkSouls2DataHelper
+    public class DarkSouls2DataHelper
     {
         public readonly PlayerParams PlayerParams;
 
-        private readonly ProcessInfo DarkSouls2Process;
+        private readonly VsProcess DarkSouls2Process;
         private nint GameDataMan;
 
-        public DarkSouls2DataHelper(ProcessInfo darkSouls2Process)
+        public DarkSouls2DataHelper(VsProcess darkSouls2Process)
         {
             DarkSouls2Process = darkSouls2Process;
             SetGameDataManAddress();
 
-            PlayerParams = new PlayerParams(DarkSouls2Process.Handle, GameDataMan);
+            PlayerParams = new PlayerParams(DarkSouls2Process.OpenHandle, GameDataMan);
         }
 
         private void SetGameDataManAddress()
@@ -29,7 +29,7 @@ namespace VibrateSouls
 
             // Get the machine code to disassemble to find address of GameDataMan
             byte[] buffer = new byte[7];
-            ReadProcessMemory(DarkSouls2Process.Handle, gameDataManAOB.Address, buffer, 7, out _);
+            ReadProcessMemory(DarkSouls2Process.OpenHandle, gameDataManAOB.Address, buffer, 7, out _);
             Instruction instruction = Disassemble(buffer);
 
             GameDataMan = gameDataManAOB.Address + (nint)instruction.MemoryDisplacement64;
